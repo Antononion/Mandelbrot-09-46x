@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="convertation">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/convertation.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/Math.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
