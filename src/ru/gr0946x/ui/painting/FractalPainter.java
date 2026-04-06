@@ -17,6 +17,7 @@ public class FractalPainter implements Painter{
 
     private static final int Thread_Count = Runtime.getRuntime().availableProcessors();
 
+    private final ExecutorService executor = Executors.newFixedThreadPool(Thread_Count);
 
     private final ColorFunction colorFunction;
     @Override
