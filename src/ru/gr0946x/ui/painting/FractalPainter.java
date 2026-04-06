@@ -4,12 +4,20 @@ import ru.gr0946x.Converter;
 import ru.gr0946x.ui.fractals.ColorFunction;
 import ru.gr0946x.ui.fractals.Fractal;
 
+import javax.print.attribute.standard.RequestingUserName;
+import java.awt.image.BufferedImage;
+import java.util.concurrent.*;
+
 import java.awt.*;
 
 public class FractalPainter implements Painter{
 
     private final Fractal fractal;
     private final Converter conv;
+
+    private static final int Thread_Count = Runtime.getRuntime().availableProcessors();
+
+
     private final ColorFunction colorFunction;
     @Override
     public int getWidth() {
