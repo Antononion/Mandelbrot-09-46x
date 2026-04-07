@@ -37,6 +37,9 @@ public class MainWindow extends JFrame {
         mainPanel.setBackground(Color.WHITE);
 
         mainPanel.addSelectListener((r) -> {
+            if (r.width <= 2 || r.height <= 2) {
+                return;
+            }
             var xMin = conv.xScr2Crt(r.x);
             var xMax = conv.xScr2Crt(r.x + r.width);
             var yMin = conv.yScr2Crt(r.y + r.height);
