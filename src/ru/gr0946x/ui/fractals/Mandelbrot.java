@@ -14,6 +14,10 @@ public class Mandelbrot implements Fractal{
         maxIterations = n;
     }
 
+    public int getMaxIterations() {
+        return maxIterations;
+    }
+
     public double getR(){
         return sqrt(R2);
     }
