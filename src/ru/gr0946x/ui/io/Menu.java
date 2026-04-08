@@ -133,11 +133,26 @@ public class Menu {
             }
             return (float) i / maxIt;
         }));
+        colorSchemeA.addActionListener(e -> window.setCurrentColorFunction(value -> {
+            if (value == 1.0f) return Color.BLACK;
+            var r = (float) Math.abs(Math.sin(5 * value));
+            var g = (float) Math.abs(Math.cos(8 * value) * Math.cos(3 * value));
+            var b = (float) Math.abs((Math.sin(7 * value) + Math.cos(15 * value)) / 2f);
+            return new Color(r, g, b);
+        }));
         colorSchemeB.addActionListener(e -> window.setCurrentColorFunction(value -> {
             if (value == 1.0f) return Color.BLACK;
             var intensity = (float) (1 - value);
             var r = intensity;
             var g = intensity;
+            var b = intensity;
+            return new Color(r, g, b);
+        }));
+        colorSchemeC.addActionListener(e -> window.setCurrentColorFunction(value -> {
+            if (value == 1.0f) return Color.BLACK;
+            var intensity = (float) (1 - value);
+            var r = 0f;
+            var g = intensity * 0.4f;
             var b = intensity;
             return new Color(r, g, b);
         }));
