@@ -1,10 +1,16 @@
 package ru.gr0946x.ui;
 
 import ru.gr0946x.Converter;
+import ru.gr0946x.ui.fractals.FractalState;
 import ru.gr0946x.ui.fractals.Mandelbrot;
+import ru.gr0946x.ui.functions.UndoManager;
 import ru.gr0946x.ui.io.Menu;
 import ru.gr0946x.ui.painting.FractalPainter;
 import ru.gr0946x.ui.painting.Painter;
+import javax.swing.KeyStroke;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.JComponent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,13 +22,14 @@ public class MainWindow extends JFrame {
     private final Painter painter;
     private final Mandelbrot mandelbrot;
     private final Converter conv;
+    private final UndoManager undoManager;
 
     public MainWindow() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(800, 650));
         mandelbrot = new Mandelbrot();
         conv = new Converter(-2.0, 1.0, -1.0, 1.0);
-
+        this.undoManager = new UndoManager(this::restoreState);
         painter = new FractalPainter(mandelbrot, conv, (value) -> {
             if (value == 1.0) return Color.BLACK;
             var r = (float)abs(sin(5 * value));
@@ -38,6 +45,11 @@ public class MainWindow extends JFrame {
             if (r.width <= 2 || r.height <= 2) {
                 return;
             }
+            undoManager.push(new FractalState(
+                    conv.getXMin(), conv.getXMax(),
+                    conv.getYMin(), conv.getYMax(),
+                    mandelbrot.getMaxIterations()
+            ));
             var xMin = conv.xScr2Crt(r.x);
             var xMax = conv.xScr2Crt(r.x + r.width);
             var yMin = conv.yScr2Crt(r.y + r.height);
@@ -52,6 +64,12 @@ public class MainWindow extends JFrame {
         new Menu(this, conv, mandelbrot);
 
         setContent();
+
+        getRootPane().registerKeyboardAction(
+                e -> undoManager.undo(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
     }
     private void setContent(){
         var gl = new GroupLayout(getContentPane());
@@ -68,6 +86,12 @@ public class MainWindow extends JFrame {
                 .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
                 .addGap(8)
         );
+    }
+    private void restoreState(FractalState state) {
+        conv.setXShape(state.xMin(), state.xMax());
+        conv.setYShape(state.yMin(), state.yMax());
+        mandelbrot.setMaxIterations(state.maxIterations());
+        mainPanel.repaint();
     }
 }
 
