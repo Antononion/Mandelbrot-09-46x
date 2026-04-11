@@ -1,13 +1,19 @@
 package ru.gr0946x.ui;
 
 import ru.gr0946x.Converter;
+import ru.gr0946x.ui.fractals.FractalState;
 import ru.gr0946x.ui.fractals.Mandelbrot;
+import ru.gr0946x.ui.functions.UndoManager;
 import ru.gr0946x.ui.io.FracSerializer;
 import ru.gr0946x.ui.io.FractalFileManager;
 import ru.gr0946x.ui.io.FractalSerializer;
 import ru.gr0946x.ui.io.Menu;
 import ru.gr0946x.ui.painting.FractalPainter;
 import ru.gr0946x.ui.painting.Painter;
+import javax.swing.KeyStroke;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.JComponent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +28,7 @@ public class MainWindow extends JFrame {
     private final FractalSerializer fracSerializer;
     private final FractalFileManager fileManager;
     private boolean adaptiveIterationsEnabled = true;
+    private final UndoManager undoManager;
 
     public MainWindow() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -29,6 +36,7 @@ public class MainWindow extends JFrame {
 
         mandelbrot = new Mandelbrot();
         conv = new Converter(-2.0, 1.0, -1.0, 1.0);
+        this.undoManager = new UndoManager(this::restoreState);
         fracSerializer = new FracSerializer();
         fileManager = new FractalFileManager(this, conv, mandelbrot);
 
@@ -47,6 +55,11 @@ public class MainWindow extends JFrame {
             if (r.width <= 2 || r.height <= 2) {
                 return;
             }
+            undoManager.push(new FractalState(
+                    conv.getXMin(), conv.getXMax(),
+                    conv.getYMin(), conv.getYMax(),
+                    mandelbrot.getMaxIterations()
+            ));
             var xMin = conv.xScr2Crt(r.x);
             var xMax = conv.xScr2Crt(r.x + r.width);
             var yMin = conv.yScr2Crt(r.y + r.height);
@@ -65,9 +78,14 @@ public class MainWindow extends JFrame {
         new Menu(this, fracSerializer, fileManager);
 
         setContent();
-    }
 
-    private void setContent() {
+        getRootPane().registerKeyboardAction(
+                e -> undoManager.undo(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
+    }
+    private void setContent(){
         var gl = new GroupLayout(getContentPane());
         setLayout(gl);
 
@@ -82,6 +100,20 @@ public class MainWindow extends JFrame {
                 .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
                 .addGap(8)
         );
+    }
+    private void restoreState(FractalState state) {
+        conv.setXShape(state.xMin(), state.xMax());
+        conv.setYShape(state.yMin(), state.yMax());
+        mandelbrot.setMaxIterations(state.maxIterations());
+        mainPanel.repaint();
+    }
+    public void triggerUndo() {
+        if (undoManager.undo()) {
+            repaint();
+        }
+    }
+    public boolean canUndo() {
+        return undoManager.canUndo();
     }
 
     public void setAdaptiveIterationsEnabled(boolean enabled) {
