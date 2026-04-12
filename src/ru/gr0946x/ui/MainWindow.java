@@ -49,8 +49,7 @@ public class MainWindow extends JFrame {
             var b = (float)abs((sin(7 * value) + cos(15 * value)) / 2f);
             return new Color(r, g, b);
         });
-
-        mainPanel = new SelectablePanel(painter, imageSerializer);
+        mainPanel = new SelectablePanel(painter, conv, imageSerializer);
         mainPanel.setBackground(Color.WHITE);
 
         mainPanel.addSelectListener((r) -> {
@@ -87,14 +86,13 @@ public class MainWindow extends JFrame {
         });
 
         new Menu(this, fracSerializer, fileManager, imageSerializer);
-
-        setContent();
-
         getRootPane().registerKeyboardAction(
                 e -> undoManager.undo(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK),
                 JComponent.WHEN_IN_FOCUSED_WINDOW
         );
+        setContent();
+
     }
     private void setContent(){
         var gl = new GroupLayout(getContentPane());
@@ -105,7 +103,6 @@ public class MainWindow extends JFrame {
                 .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
                 .addGap(8)
         );
-
         gl.setHorizontalGroup(gl.createSequentialGroup()
                 .addGap(8)
                 .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
