@@ -15,17 +15,17 @@ public class JuliaFractal implements Fractal {
         this.constant = constant;
     }
 
-    //public Complex getConstant() {
-    //    return constant;
-    //}
-
-    //public void setMaxIterations(int n) {
-    //    maxIterations = n;
-    //}
-
-    //public int getMaxIterations() {
-    //return maxIterations;
-    //}
+    /* Не использовалось
+     public Complex getConstant() {
+        return constant;
+    }
+    public void setMaxIterations(int n) {
+        maxIterations = n;
+    }
+    public int getMaxIterations() {
+    return maxIterations;
+    }
+    */
 
     @Override
     public float inSetProbability(double x, double y) {
