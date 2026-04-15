@@ -11,14 +11,13 @@ import java.awt.event.MouseEvent;
 import java.lang.reflect.Field;
 
 public class JuliaSetController {
-
     public static void attachTo(MainWindow mainWindow) {
         try {
             Field mainPanelField = MainWindow.class.getDeclaredField("mainPanel");
             mainPanelField.setAccessible(true);
             SelectablePanel mainPanel = (SelectablePanel) mainPanelField.get(mainWindow);
 
-            Field convField = MainWindow.class.getDeclaredField("conv");
+            Field convField = MainWindow.class.getDeclaredField("converter");
             convField.setAccessible(true);
             Converter converter = (Converter) convField.get(mainWindow);
 
@@ -38,7 +37,7 @@ public class JuliaSetController {
 
         } catch (NoSuchFieldException | IllegalAccessException ex) {
             JOptionPane.showMessageDialog(mainWindow,
-                    "Ошибка: не удалось подключить множество Жюлия.\n" +
+                    "Ошибка: не удалось подключить множество Жюлиа.\n" +
                             "Сообщение: " + ex.getMessage(),
                     "Ошибка",
                     JOptionPane.ERROR_MESSAGE);

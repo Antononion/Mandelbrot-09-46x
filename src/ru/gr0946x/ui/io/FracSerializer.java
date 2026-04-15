@@ -2,7 +2,7 @@ package ru.gr0946x.ui.io;
 
 import ru.gr0946x.Converter;
 import ru.gr0946x.ui.fractals.FractalState;
-import ru.gr0946x.ui.fractals.Mandelbrot;
+import ru.gr0946x.ui.fractals.QuadraticFractal;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -12,7 +12,7 @@ import java.io.*;
 public class FracSerializer implements FractalSerializer {
 
     @Override
-    public void save(Component parent, Converter conv, Mandelbrot mandelbrot) {
+    public void save(Component parent, Converter conv, QuadraticFractal fractal) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new FileNameExtensionFilter("Файлы фракталов (*.frac)", "frac"));
         fileChooser.setAcceptAllFileFilterUsed(false);
@@ -30,7 +30,7 @@ public class FracSerializer implements FractalSerializer {
                         conv.getXMax(),
                         conv.getYMin(),
                         conv.getYMax(),
-                        mandelbrot.getMaxIterations()
+                        fractal.getMaxIterations()
                 );
                 oos.writeObject(state);
                 JOptionPane.showMessageDialog(parent, "Фрактал успешно сохранен!", "Успех", JOptionPane.INFORMATION_MESSAGE);
@@ -41,7 +41,7 @@ public class FracSerializer implements FractalSerializer {
     }
 
     @Override
-    public void open(Component parent, Converter conv, Mandelbrot mandelbrot, Runnable onSuccess) {
+    public void open(Component parent, Converter conv, QuadraticFractal fractal, Runnable onSuccess) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new FileNameExtensionFilter("Файлы фракталов (*.frac)", "frac"));
         fileChooser.setAcceptAllFileFilterUsed(false);
@@ -54,7 +54,7 @@ public class FracSerializer implements FractalSerializer {
 
                 conv.setXShape(state.xMin(), state.xMax());
                 conv.setYShape(state.yMin(), state.yMax());
-                mandelbrot.setMaxIterations(state.maxIterations());
+                fractal.setMaxIterations(state.maxIterations());
 
                 onSuccess.run();
             } catch (Exception ex) {
@@ -63,7 +63,7 @@ public class FracSerializer implements FractalSerializer {
         }
     }
 
-    public void saveWithFormatChoice(Component parent, Converter conv, Mandelbrot mandelbrot, JPanel paintPanel, ImageSerializer imageSerializer) {
+    public void saveWithFormatChoice(Component parent, Converter conv, QuadraticFractal fractal, JPanel paintPanel, ImageSerializer imageSerializer) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Сохранить фрактал");
 
@@ -89,7 +89,7 @@ public class FracSerializer implements FractalSerializer {
                     file = new File(path);
                 }
                 try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-                    oos.writeObject(new FractalState(conv.getXMin(), conv.getXMax(), conv.getYMin(), conv.getYMax(), mandelbrot.getMaxIterations()));
+                    oos.writeObject(new FractalState(conv.getXMin(), conv.getXMax(), conv.getYMin(), conv.getYMax(), fractal.getMaxIterations()));
                     JOptionPane.showMessageDialog(parent, "Фрактал сохранён!", "Успех", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(parent, "Ошибка: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
@@ -102,7 +102,7 @@ public class FracSerializer implements FractalSerializer {
         }
     }
 
-    public void openWithFormatChoice(Component parent, Converter conv, Mandelbrot mandelbrot, JPanel paintPanel, ImageSerializer imageSerializer) {
+    public void openWithFormatChoice(Component parent, Converter conv, QuadraticFractal fractal, JPanel paintPanel, ImageSerializer imageSerializer) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Открыть файл");
 
@@ -125,7 +125,7 @@ public class FracSerializer implements FractalSerializer {
                     FractalState state = (FractalState) ois.readObject();
                     conv.setXShape(state.xMin(), state.xMax());
                     conv.setYShape(state.yMin(), state.yMax());
-                    mandelbrot.setMaxIterations(state.maxIterations());
+                    fractal.setMaxIterations(state.maxIterations());
 
                     // ОЧИЩАЕМ ИЗОБРАЖЕНИЕ ПЕРЕД ОТКРЫТИЕМ ФРАКТАЛА
                     imageSerializer.clearImage();

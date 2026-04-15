@@ -1,58 +1,49 @@
 package ru.gr0946x.ui;
 
 import ru.gr0946x.Converter;
-
-import ru.gr0946x.ui.fractals.ColorFunction;
-import ru.gr0946x.ui.fractals.Fractal;
-import ru.gr0946x.ui.fractals.FractalState;
-import ru.gr0946x.ui.fractals.Mandelbrot;
+import ru.gr0946x.ui.fractals.*;
 import ru.gr0946x.ui.functions.UndoManager;
 import ru.gr0946x.ui.io.*;
 import ru.gr0946x.ui.painting.FractalPainter;
 import ru.gr0946x.ui.painting.Painter;
+
 import javax.swing.KeyStroke;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.JComponent;
-
 import javax.swing.*;
 import java.awt.*;
 
-import static java.lang.Math.*;
-
 public class MainWindow extends JFrame {
-    private final SelectablePanel mainPanel;
-    private final Painter painter;
-    private final Mandelbrot mandelbrot;
-    private final Converter conv;
+    private final Converter converter;
+    private final QuadraticFractal fractal;
     private final FracSerializer fracSerializer;
     private final FractalFileManager fileManager;
     private final ImageSerializer imageSerializer;
     private boolean adaptiveIterationsEnabled = true;
     private final UndoManager undoManager;
+    private final FunctionAndColorSchemesLists lists;
+    private final Painter painter;
+    private final SelectablePanel mainPanel;
 
     public MainWindow() {
+        setTitle("Фрактал");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(800, 650));
 
-        mandelbrot = new Mandelbrot();
-        conv = new Converter(-2.0, 1.0, -1.0, 1.0);
-        this.undoManager = new UndoManager(this::restoreState);
+        converter = new Converter(-2.0, 1.0, -1.0, 1.0);
+        fractal = new QuadraticFractal();
         fracSerializer = new FracSerializer();
-        fileManager = new FractalFileManager(this, conv, mandelbrot);
+        fileManager = new FractalFileManager(this, converter, fractal);
         imageSerializer = new ImageSerializer();
-
-        painter = new FractalPainter(mandelbrot, conv, (value) -> {
-            if (value == 1.0) return Color.BLACK;
-            var r = (float)abs(sin(5 * value));
-            var g = (float)abs(cos(8 * value) * sin (3 * value));
-            var b = (float)abs((sin(7 * value) + cos(15 * value)) / 2f);
-            return new Color(r, g, b);
-        });
-        mainPanel = new SelectablePanel(painter, conv, imageSerializer);
+        undoManager = new UndoManager(this::restoreState);
+        lists = new FunctionAndColorSchemesLists();
+        ColorFunction firstColorScheme = lists.getColorSchemes().getFirst();
+        painter = new FractalPainter(fractal, converter, firstColorScheme);
+        mainPanel = new SelectablePanel(painter, converter, imageSerializer);
         mainPanel.setBackground(Color.WHITE);
 
-        mainPanel.addSelectListener((r) -> {
+        mainPanel.addSelectListener(r -> {
             if (imageSerializer.isImageMode()) {
                 JOptionPane.showMessageDialog(this,
                         "Масштабирование недоступно при просмотре изображения.\nОткройте фрактал (.frac) для масштабирования.",
@@ -61,44 +52,43 @@ public class MainWindow extends JFrame {
                 return;
             }
 
-            if (r.width <= 2 || r.height <= 2) {
+            if (r.width <= 2 || r.height <= 2)
                 return;
-            }
+
             undoManager.push(new FractalState(
-                    conv.getXMin(), conv.getXMax(),
-                    conv.getYMin(), conv.getYMax(),
-                    mandelbrot.getMaxIterations()
+                    converter.getXMin(), converter.getXMax(),
+                    converter.getYMin(), converter.getYMax(),
+                    fractal.getMaxIterations()
             ));
-            var xMin = conv.xScr2Crt(r.x);
-            var xMax = conv.xScr2Crt(r.x + r.width);
-            var yMin = conv.yScr2Crt(r.y + r.height);
-            var yMax = conv.yScr2Crt(r.y);
-            conv.setXShape(xMin, xMax);
-            conv.setYShape(yMin, yMax);
+
+            var xMin = converter.xScr2Crt(r.x);
+            var xMax = converter.xScr2Crt(r.x + r.width);
+            var yMin = converter.yScr2Crt(r.y + r.height);
+            var yMax = converter.yScr2Crt(r.y);
+            converter.setXShape(xMin, xMax);
+            converter.setYShape(yMin, yMax);
 
             if (adaptiveIterationsEnabled) {
                 double zoomFactor = 3.0 / (xMax - xMin);
-                mandelbrot.setMaxIterations(Math.max(100, (int)(100 * (1 + Math.log10(zoomFactor)))));
+                fractal.setMaxIterations(Math.max(100, (int)(100 * (1 + Math.log10(zoomFactor)))));
             }
 
             imageSerializer.clearImage();
             mainPanel.repaint();
         });
 
-        new MenuManager(this, new MainMenuProvider(
-                this,
-                fracSerializer,
-                fileManager,
-                imageSerializer));
+        new MenuManager(this, new MainMenuProvider(this));
+
         getRootPane().registerKeyboardAction(
                 e -> undoManager.undo(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK),
                 JComponent.WHEN_IN_FOCUSED_WINDOW
         );
-        setContent();
 
+        setContent();
     }
-    private void setContent(){
+
+    private void setContent() {
         var gl = new GroupLayout(getContentPane());
         setLayout(gl);
 
@@ -107,46 +97,50 @@ public class MainWindow extends JFrame {
                 .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
                 .addGap(8)
         );
+
         gl.setHorizontalGroup(gl.createSequentialGroup()
                 .addGap(8)
                 .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
                 .addGap(8)
         );
     }
+
     public void setCurrentFractal(Fractal fractal) {
-        if (painter instanceof FractalPainter fp) {
+        if (painter instanceof FractalPainter fp)
             fp.setFractal(fractal);
-        }
+
         mainPanel.repaint();
     }
+
     public void setCurrentColorFunction(ColorFunction colorFunction) {
-        if (painter instanceof FractalPainter fp) {
+        if (painter instanceof FractalPainter fp)
             fp.setColorFunction(colorFunction);
-        }
+
         mainPanel.repaint();
     }
 
     private void restoreState(FractalState state) {
-        conv.setXShape(state.xMin(), state.xMax());
-        conv.setYShape(state.yMin(), state.yMax());
-        mandelbrot.setMaxIterations(state.maxIterations());
+        converter.setXShape(state.xMin(), state.xMax());
+        converter.setYShape(state.yMin(), state.yMax());
+        fractal.setMaxIterations(state.maxIterations());
         mainPanel.repaint();
     }
+
     public void triggerUndo() {
-        if (undoManager.undo()) {
-            repaint();
-        }
+        if (undoManager.undo())
+            mainPanel.repaint();
     }
+
     public boolean canUndo() {
         return undoManager.canUndo();
     }
 
     public void saveFractal() {
-        fracSerializer.saveWithFormatChoice(this, conv, mandelbrot, mainPanel, imageSerializer);
+        fracSerializer.saveWithFormatChoice(this, converter, fractal, mainPanel, imageSerializer);
     }
 
     public void openFile() {
-        fracSerializer.openWithFormatChoice(this, conv, mandelbrot, mainPanel, imageSerializer);
+        fracSerializer.openWithFormatChoice(this, converter, fractal, mainPanel, imageSerializer);
     }
 
     public void setAdaptiveIterationsEnabled(boolean enabled) {

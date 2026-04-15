@@ -1,7 +1,7 @@
 package ru.gr0946x.ui.io;
 
 import ru.gr0946x.Converter;
-import ru.gr0946x.ui.fractals.Mandelbrot;
+import ru.gr0946x.ui.fractals.QuadraticFractal;
 
 import java.awt.*;
 
@@ -9,19 +9,19 @@ public class FractalFileManager {
 
     private final Component parent;
     private final Converter conv;
-    private final Mandelbrot mandelbrot;
+    private final QuadraticFractal fractal;
 
-    public FractalFileManager(Component parent, Converter conv, Mandelbrot mandelbrot) {
+    public FractalFileManager(Component parent, Converter conv, QuadraticFractal fractal) {
         this.parent = parent;
         this.conv = conv;
-        this.mandelbrot = mandelbrot;
+        this.fractal = fractal;
     }
 
     public void save(FractalSerializer serializer) {
-        serializer.save(parent, conv, mandelbrot);
+        serializer.save(parent, conv, fractal);
     }
 
     public void open(FractalSerializer serializer, Runnable onSuccess) {
-        serializer.open(parent, conv, mandelbrot, onSuccess);
+        serializer.open(parent, conv, fractal, onSuccess);
     }
 }

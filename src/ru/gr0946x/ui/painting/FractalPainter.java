@@ -11,50 +11,46 @@ import java.util.concurrent.*;
 import java.awt.*;
 
 public class FractalPainter implements Painter {
-
-    private  Fractal fractal;
-    private final Converter conv;
-
     private static final int Thread_Count = Runtime.getRuntime().availableProcessors();
 
+    private final Converter converter;
+    private Fractal fractal;
+    private ColorFunction colorFunction;
     private final ExecutorService executor = Executors.newFixedThreadPool(Thread_Count);
 
-    private  ColorFunction colorFunction;
-
-
-    public FractalPainter(Fractal f, Converter conv, ColorFunction cf) {
+    public FractalPainter(Fractal f, Converter converter, ColorFunction cf) {
         this.fractal = f;
-        this.conv = conv;
+        this.converter = converter;
         this.colorFunction = cf;
     }
+
     public void setFractal(Fractal fractal) {
         this.fractal = fractal;
     }
+
     public void setColorFunction(ColorFunction colorFunction) {
         this.colorFunction = colorFunction;
     }
 
-
     @Override
     public int getWidth() {
-        return conv.getWidth();
+        return converter.getWidth();
     }
 
     @Override
     public int getHeight() {
-        return conv.getHeight();
+        return converter.getHeight();
     }
 
     @Override
     public void setWidth(int width) {
-        conv.setWidth(width);
+        converter.setWidth(width);
     }
 
     @Override
     public void setHeight(int height) {
-        conv.setHeight(height);
+        converter.setHeight(height);
     }
-
 
     @Override
     public void paint(Graphics g) {
@@ -67,21 +63,19 @@ public class FractalPainter implements Painter {
         int stripHeight = (int) Math.ceil((double) h / Thread_Count);
         CountDownLatch latch = new CountDownLatch(Thread_Count);
 
-
         for (int t = 0; t < Thread_Count; t++) {
             final int rowStart = t * stripHeight;
             final int rowEnd = Math.min(rowStart + stripHeight, h);
 
             executor.submit(() -> {
                 try {
-                    for (int j = rowStart; j < rowEnd; j++) {
+                    for (int j = rowStart; j < rowEnd; j++)
                         for (int i = 0; i < w; i++) {
-                            double x = conv.xScr2Crt(i);
-                            double y = conv.yScr2Crt(j);
+                            double x = converter.xScr2Crt(i);
+                            double y = converter.yScr2Crt(j);
                             float res = fractal.inSetProbability(x, y);
                             image.setRGB(i, j, colorFunction.getColor(res).getRGB());
                         }
-                    }
                 } finally {
                     latch.countDown();
                 }
@@ -97,4 +91,3 @@ public class FractalPainter implements Painter {
         g.drawImage(image, 0, 0, null);
     }
 }
-

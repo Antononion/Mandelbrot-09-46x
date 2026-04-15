@@ -8,11 +8,13 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FunctionAndColorShemsLists {
+import static java.lang.Math.*;
+
+public class FunctionAndColorSchemesLists {
     private final List<Fractal> fractalFunctions = new ArrayList<>();
     private final List<ColorFunction> colorSchemes = new ArrayList<>();
 
-    public FunctionAndColorShemsLists() {
+    public FunctionAndColorSchemesLists() {
         initFractals();
         initColorSchemes();
     }
@@ -65,23 +67,23 @@ public class FunctionAndColorShemsLists {
     private void initColorSchemes() {
         // Схема 1
         colorSchemes.add(value -> {
-            if (value == 1.0f) return Color.BLACK;
-            var r = (float) Math.abs(Math.cos(5 * value));
-            var g = (float) Math.abs(Math.cos(8 * value) * Math.cos(3 * value));
-            var b = (float) Math.abs((Math.sin(7 * value) + Math.cos(15 * value)) / 2f);
+            if (value == 1.0) return Color.BLACK;
+            var r = (float)abs(sin(5 * value));
+            var g = (float)abs(cos(8 * value) * sin (3 * value));
+            var b = (float)abs((sin(7 * value) + cos(15 * value)) / 2f);
             return new Color(r, g, b);
         });
 
         // Схема 2
         colorSchemes.add(value -> {
-            if (value == 1.0f) return Color.BLACK;
+            if (value == 1.0) return Color.BLACK;
             var intensity = 1 - value;
             return new Color(intensity, intensity, intensity);
         });
 
-        // Схема 3 — Синяя
+        // Схема 3
         colorSchemes.add(value -> {
-            if (value == 1.0f) return Color.BLACK;
+            if (value == 1.0) return Color.BLACK;
             var intensity = 1 - value;
             return new Color(0f, intensity * 0.4f, intensity);
         });
