@@ -32,4 +32,15 @@ public class SelectedRect {
         x2 = x;
         y2 = y;
     }
+
+    /**
+     * Like setLastPoint, but constrains the height so that
+     * width/height == panelWidth/panelHeight (preserves aspect ratio).
+     */
+    public void setLastPointConstrained(int x, int y, int panelWidth, int panelHeight) {
+        x2 = x;
+        int absWidth = Math.abs(x2 - x1);
+        int constrainedHeight = (int) Math.round((double) absWidth * panelHeight / panelWidth);
+        y2 = y1 + (y >= y1 ? constrainedHeight : -constrainedHeight);
+    }
 }

@@ -8,6 +8,7 @@ import ru.gr0946x.ui.fractals.FractalState;
 import ru.gr0946x.ui.fractals.QuadraticFractal;
 import ru.gr0946x.ui.functions.UndoManager;
 import ru.gr0946x.ui.io.*;
+import ru.gr0946x.ui.tour.TourWindow;
 import ru.gr0946x.ui.painting.FractalPainter;
 import ru.gr0946x.ui.painting.Painter;
 import ru.gr0946x.ui.FunctionAndColorSchemesLists;
@@ -30,6 +31,7 @@ public class JuliaSetWindow extends JFrame {
     private final FunctionAndColorSchemesLists lists;
     private final Painter painter;
     private final SelectablePanel fractalPanel;
+    private TourWindow tourWindow;
 
     public JuliaSetWindow(Complex point) {
         setTitle("Множество Жюлиа: " + formatComplex(point));
@@ -183,5 +185,26 @@ public class JuliaSetWindow extends JFrame {
 
     public void setAdaptiveIterationsEnabled(boolean enabled) {
         this.adaptiveIterationsEnabled = enabled;
+    }
+
+    public FractalState captureState() {
+        return new FractalState(
+                converter.getXMin(), converter.getXMax(),
+                converter.getYMin(), converter.getYMax(),
+                fractal.getMaxIterations()
+        );
+    }
+
+    public void openTourWindow() {
+        ColorFunction cf = (painter instanceof FractalPainter fp)
+                ? fp.getColorFunction()
+                : lists.getColorSchemes().getFirst();
+        if (tourWindow == null || !tourWindow.isDisplayable()) {
+            tourWindow = new TourWindow(fractal, converter, cf);
+            tourWindow.setVisible(true);
+        } else {
+            tourWindow.setColorFunction(cf);
+            tourWindow.toFront();
+        }
     }
 }

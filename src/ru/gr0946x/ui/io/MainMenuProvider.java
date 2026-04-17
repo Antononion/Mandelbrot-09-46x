@@ -29,9 +29,14 @@ public class MainMenuProvider implements MenuProvider {
         openItem.addActionListener(_ -> mainWindow.openFile());
         openItem.setAccelerator(KeyStroke.getKeyStroke("control O"));
 
+        JMenuItem tourItem = new JMenuItem("Экскурсия по фракталу...");
+        tourItem.addActionListener(_ -> mainWindow.openTourWindow());
+
         fileMenu.add(saveAsItem);
         fileMenu.addSeparator();
         fileMenu.add(openItem);
+        fileMenu.addSeparator();
+        fileMenu.add(tourItem);
 
         return fileMenu;
     }

@@ -29,9 +29,14 @@ public class JuliaMenuProvider implements MenuProvider {
         openItem.addActionListener(_ -> juliaWindow.openFile());
         openItem.setAccelerator(KeyStroke.getKeyStroke("control O"));
 
+        JMenuItem tourItem = new JMenuItem("Экскурсия по фракталу...");
+        tourItem.addActionListener(_ -> juliaWindow.openTourWindow());
+
         fileMenu.add(saveAsItem);
         fileMenu.addSeparator();
         fileMenu.add(openItem);
+        fileMenu.addSeparator();
+        fileMenu.add(tourItem);
 
         return fileMenu;
     }

@@ -4,6 +4,7 @@ import ru.gr0946x.Converter;
 import ru.gr0946x.ui.fractals.*;
 import ru.gr0946x.ui.functions.UndoManager;
 import ru.gr0946x.ui.io.*;
+import ru.gr0946x.ui.tour.TourWindow;
 import ru.gr0946x.ui.painting.FractalPainter;
 import ru.gr0946x.ui.painting.Painter;
 
@@ -25,6 +26,7 @@ public class MainWindow extends JFrame {
     private final FunctionAndColorSchemesLists lists;
     private final Painter painter;
     private final SelectablePanel mainPanel;
+    private TourWindow tourWindow;
 
     public MainWindow() {
         setTitle("Фрактал");
@@ -153,5 +155,26 @@ public class MainWindow extends JFrame {
 
     public void setAdaptiveIterationsEnabled(boolean enabled) {
         this.adaptiveIterationsEnabled = enabled;
+    }
+
+    public FractalState captureState() {
+        return new FractalState(
+                converter.getXMin(), converter.getXMax(),
+                converter.getYMin(), converter.getYMax(),
+                fractal.getMaxIterations()
+        );
+    }
+
+    public void openTourWindow() {
+        ColorFunction cf = (painter instanceof FractalPainter fp)
+                ? fp.getColorFunction()
+                : lists.getColorSchemes().getFirst();
+        if (tourWindow == null || !tourWindow.isDisplayable()) {
+            tourWindow = new TourWindow(fractal, converter, cf);
+            tourWindow.setVisible(true);
+        } else {
+            tourWindow.setColorFunction(cf);
+            tourWindow.toFront();
+        }
     }
 }

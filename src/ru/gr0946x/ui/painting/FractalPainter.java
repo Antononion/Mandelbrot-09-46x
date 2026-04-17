@@ -32,6 +32,10 @@ public class FractalPainter implements Painter {
         this.colorFunction = colorFunction;
     }
 
+    public ColorFunction getColorFunction() {
+        return colorFunction;
+    }
+
     @Override
     public int getWidth() {
         return converter.getWidth();

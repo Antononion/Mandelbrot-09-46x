@@ -70,7 +70,7 @@ public class SelectablePanel extends PaintPanel{
                 super.mouseDragged(e);
                 if (SwingUtilities.isLeftMouseButton(e) && rect != null) {
                     paintSelectedRect();
-                    rect.setLastPoint(e.getX(), e.getY());
+                    rect.setLastPointConstrained(e.getX(), e.getY(), getWidth(), getHeight());
                     paintSelectedRect();
                 } else if (SwingUtilities.isRightMouseButton(e) && isRightDragging) {
                     int deltaX = e.getX() - lastDragX;
@@ -100,8 +100,20 @@ public class SelectablePanel extends PaintPanel{
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
                 g = getGraphics();
+                adjustAspectRatio();
             }
         });
+    }
+
+    private void adjustAspectRatio() {
+        int w = getWidth();
+        int h = getHeight();
+        if (w <= 0 || h <= 0) return;
+        double cx = (converter.getXMin() + converter.getXMax()) / 2.0;
+        double cy = (converter.getYMin() + converter.getYMax()) / 2.0;
+        double xRange = converter.getXMax() - converter.getXMin();
+        double newYRange = xRange * h / w;
+        converter.setYShape(cy - newYRange / 2.0, cy + newYRange / 2.0);
     }
 
     public void addSelectListener(SelectListener listener) {
